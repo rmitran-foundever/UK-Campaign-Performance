@@ -1,0 +1,106 @@
+{
+  "report_meta": {
+    "title": "Foundever EMEA — UK Campaign Dashboard",
+    "subtitle": "LinkedIn horizontal + Influ2 verticalised cohorts",
+    "last_updated": "2026-04-28",
+    "owner": "Raluca Mitran",
+    "notes": "Update this file each week. Layout is in index.html — only numbers and dates change here."
+  },
+
+  "linkedin_horizontal": {
+    "campaign_name": "2026-Q2-UK-Horizontal-Campaign",
+    "ad_set": "Website visits — Apr 23, 2026",
+    "objective": "Website Visits",
+    "format": "Sponsored Content",
+    "main_creative": "rightshoring",
+    "date_range": "30 Mar — 28 Apr 2026",
+    "metrics": {
+      "spend_usd": 305.97,
+      "impressions": 1745,
+      "clicks": 26,
+      "ctr_pct": 1.49,
+      "cpm_usd": 175.34,
+      "cpc_usd": 11.77
+    },
+    "top_titles": [
+      { "title": "Customer Service Manager", "impressions": 119, "clicks": 3, "ctr_pct": 2.52, "note": "Highest CTR — strongest signal that rightshoring is landing with operations buyers" },
+      { "title": "Chief Executive Officer", "impressions": 225, "clicks": 3, "ctr_pct": 1.33, "note": "Largest reach + clicks above reporting minimum" },
+      { "title": "Director of Operations", "impressions": 137, "clicks": null, "ctr_pct": null, "note": "Strong reach; clicks below LinkedIn reporting minimum" }
+    ],
+    "top_companies": [
+      { "company": "NHS England", "impressions": 69, "share_pct": 3.95 },
+      { "company": "DWP", "impressions": 65, "share_pct": 3.72 },
+      { "company": "Monzo Bank", "impressions": 60, "share_pct": 3.44 },
+      { "company": "Nuffield Health", "impressions": 59, "share_pct": 3.38 },
+      { "company": "Lloyds Banking Group", "impressions": 58, "share_pct": 3.32 },
+      { "company": "Amazon", "impressions": 54, "share_pct": 3.09 },
+      { "company": "Aviva", "impressions": 49, "share_pct": 2.81 },
+      { "company": "Vodafone", "impressions": 48, "share_pct": 2.75 },
+      { "company": "M&G", "impressions": 45, "share_pct": 2.58 },
+      { "company": "Specsavers", "impressions": 44, "share_pct": 2.52 }
+    ]
+  },
+
+  "influ2_th": {
+    "cohort_name": "2026_Q1_UK_Travel&Hospitality_Vertical_Influ2",
+    "vertical": "Travel & Hospitality",
+    "date_range_pulled": "1 Jan — 28 Apr 2026",
+    "active_period": "Feb 24 — now",
+    "metrics": {
+      "reach_targets": "28/64",
+      "reach_buying_groups": "17/39",
+      "impressions": 174,
+      "ctr_pct": 0.57,
+      "top_creative": { "name": "T&H_eBook", "impressions": 143, "ctr_pct": 0.70 }
+    },
+    "top_contacts": [
+      { "name": "Matt Callaghan", "title": "COO", "company": "easyJet", "last_engagement": "Apr 16" },
+      { "name": "David Morgan", "title": "COO", "company": "easyJet", "last_engagement": "Apr 16" },
+      { "name": "Chris Evans", "title": "Director, Procurement", "company": "easyJet", "last_engagement": "Apr 16" },
+      { "name": "Anne Doyle", "title": "Sr Director Business Operations", "company": "SkyScanner", "last_engagement": "Apr 09" },
+      { "name": "Tracey Messner", "title": "Head of CX", "company": "Network Rail", "last_engagement": "Mar 22" }
+    ],
+    "top_companies": [
+      { "company": "easyJet", "contacts": 4 },
+      { "company": "Travelodge Hotels", "contacts": 3 },
+      { "company": "Network Rail", "contacts": 2 },
+      { "company": "P&O Cruises", "contacts": 1 },
+      { "company": "Secret Escapes", "contacts": 1 }
+    ]
+  },
+
+  "influ2_bfs": {
+    "cohort_name": "BFS_Localization_UK",
+    "vertical": "Banking & Financial Services",
+    "date_range_pulled": "29 Mar — 28 Apr 2026",
+    "active_period": "Jan 15 — now",
+    "metrics": {
+      "reach_targets": "36/306",
+      "reach_buying_groups": "23/62",
+      "impressions": 1516,
+      "ctr_pct": 0.26,
+      "top_creative": { "name": "BFS_UK_Phone", "impressions": 1199, "ctr_pct": 0.33 }
+    },
+    "top_contacts": [
+      { "name": "Leslie Bruce", "title": "Head of Member Analytics", "company": "Nationwide", "last_engagement": "Apr 23" },
+      { "name": "Matthew Baillie", "title": "Group COO", "company": "OSB Group", "last_engagement": "Apr 21" },
+      { "name": "Tony Cahill", "title": "Head of Tech Procurement", "company": "Nationwide", "last_engagement": "Apr 18" },
+      { "name": "Tania Khullar", "title": "VP Strategic Sourcing", "company": "Goldman Sachs", "last_engagement": "199 imp" },
+      { "name": "Heather Kane", "title": "Head of Ops NI & Partnerships", "company": "Bank of Ireland", "last_engagement": "198 imp" }
+    ],
+    "top_companies": [
+      { "company": "Nationwide Building Society", "contacts": 3 },
+      { "company": "OSB Group", "contacts": 2 },
+      { "company": "Bank of Ireland", "contacts": 2 },
+      { "company": "Barclays Bank UK", "contacts": 2 },
+      { "company": "Goldman Sachs", "contacts": 1 }
+    ]
+  },
+
+  "sea": {
+    "status": "pending",
+    "note": "SEA data still to pull from team — once received, add a 'sea' block here mirroring the linkedin_horizontal structure and the dashboard will surface it automatically."
+  },
+
+  "read_of_the_week": "Horizontal LinkedIn (rightshoring) is buying real attention from CEOs and Customer Service Managers — CSM CTR is 2.5%, ~2× the campaign average — and is reaching the right account list (NHS, DWP, Lloyds, Aviva, Monzo, Vodafone). Verticalised Influ2 is doing the second job: BFS is converting reach into rich engagement at Nationwide, OSB and Goldman; T&H has easyJet lit up across 4 contacts inside one buying group. Next: pull the SEA layer to close the picture."
+}

@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Foundever EMEA — UK Campaign Dashboard</title>
+<style>
+  :root {
+    --bg: #faf9f5;
+    --surface: #ffffff;
+    --surface-2: #f3f1ea;
+    --text: #1c1c1a;
+    --text-2: #5f5e5a;
+    --text-3: #888780;
+    --border: rgba(28, 28, 26, 0.12);
+    --accent: #185fa5;
+    --accent-bg: #e6f1fb;
+    --good: #3b6d11;
+    --warn: #854f0b;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #1a1a18;
+      --surface: #232321;
+      --surface-2: #2a2a28;
+      --text: #f0eee6;
+      --text-2: #b4b2a9;
+      --text-3: #888780;
+      --border: rgba(255, 255, 255, 0.12);
+      --accent: #85b7eb;
+      --accent-bg: rgba(133, 183, 235, 0.12);
+    }
+  }
+
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    font-size: 15px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 2.5rem 1.5rem 4rem; }
+
+  header.page-head { display: flex; align-items: flex-start; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.75rem; padding-bottom: 1.25rem; border-bottom: 0.5px solid var(--border); }
+  header.page-head h1 { margin: 0 0 0.25rem; font-size: 24px; font-weight: 500; letter-spacing: -0.01em; }
+  header.page-head p { margin: 0; font-size: 14px; color: var(--text-2); }
+  .meta { font-size: 12px; color: var(--text-3); text-align: right; line-height: 1.6; }
+  .meta strong { color: var(--text-2); font-weight: 500; }
+
+  section { margin: 0 0 2.5rem; }
+  section .sec-head { display: flex; align-items: baseline; justify-content: space-between; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 0.25rem; }
+  section h2 { margin: 0; font-size: 18px; font-weight: 500; }
+  section .sec-head .range { font-size: 12px; color: var(--text-3); }
+  section > p.lead { margin: 0 0 1rem; font-size: 13px; color: var(--text-2); }
+
+  .metric-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 1.25rem; }
+  .metric { background: var(--surface-2); border-radius: 8px; padding: 14px 16px; }
+  .metric .label { font-size: 12px; color: var(--text-2); }
+  .metric .value { font-size: 24px; font-weight: 500; margin-top: 2px; }
+
+  .two-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .two-col { grid-template-columns: 1fr; } }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .card h3 { margin: 0 0 0.5rem; font-size: 14px; font-weight: 500; display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+  .card .sub { font-size: 11px; color: var(--text-3); margin: 0 0 10px; }
+  .pill { font-size: 11px; color: var(--accent); background: var(--accent-bg); padding: 2px 8px; border-radius: 6px; font-weight: 500; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  table th { font-weight: 400; text-align: left; color: var(--text-2); border-bottom: 0.5px solid var(--border); padding: 6px 0; font-size: 12px; }
+  table td { padding: 6px 0; border-bottom: 0.5px solid var(--border); }
+  table tr:last-child td { border-bottom: 0; }
+  td.num { text-align: right; white-space: nowrap; color: var(--text-2); }
+  td.num strong { color: var(--text); font-weight: 500; }
+  .contact .name { font-weight: 500; }
+  .contact .role { color: var(--text-2); font-size: 12px; }
+  .insight { font-size: 11px; color: var(--text-3); margin: 8px 0 0; }
+
+  .small-metric-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin: 0 0 12px; }
+  .small-metric { background: var(--surface-2); border-radius: 8px; padding: 8px 10px; }
+  .small-metric .label { font-size: 11px; color: var(--text-2); }
+  .small-metric .value { font-size: 16px; font-weight: 500; }
+  .small-metric.span-2 { grid-column: span 2; }
+  .small-metric .creative { font-size: 13px; font-weight: 500; }
+
+  .group-head { font-size: 12px; font-weight: 500; color: var(--text-2); margin: 14px 0 6px; text-transform: none; }
+
+  .read { background: var(--surface-2); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: var(--text-2); margin-top: 1rem; }
+  .read strong { color: var(--text); font-weight: 500; }
+
+  .pending { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--warn); background: rgba(133, 79, 11, 0.08); padding: 4px 10px; border-radius: 6px; }
+  .pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
+
+  footer.page-foot { margin-top: 3rem; padding-top: 1.25rem; border-top: 0.5px solid var(--border); font-size: 12px; color: var(--text-3); display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; }
+
+  #loading, #error { padding: 3rem 1rem; text-align: center; color: var(--text-2); font-size: 14px; }
+  #error { color: var(--warn); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div id="loading">Loading dashboard…</div>
+<div id="error" style="display:none;"></div>
+
+<div id="root" style="display:none;">
+
+  <header class="page-head">
+    <div>
+      <h1 id="title"></h1>
+      <p id="subtitle"></p>
+    </div>
+    <div class="meta">
+      <div><strong>Last updated</strong> · <span id="last_updated"></span></div>
+      <div><strong>Owner</strong> · <span id="owner"></span></div>
+    </div>
+  </header>
+
+  <section id="sec-li">
+    <div class="sec-head">
+      <h2>UK — LinkedIn horizontal campaign</h2>
+      <span class="range" id="li_range"></span>
+    </div>
+    <p class="lead" id="li_lead"></p>
+    <div class="metric-grid" id="li_metrics"></div>
+    <div class="two-col">
+      <div class="card">
+        <h3>Top engaged titles <span style="font-size:11px; color:var(--text-3); font-weight:400;">by clicks &amp; CTR</span></h3>
+        <table>
+          <thead><tr><th>Title</th><th style="text-align:right;">Imp</th><th style="text-align:right;">Clicks</th><th style="text-align:right;">CTR</th></tr></thead>
+          <tbody id="li_titles"></tbody>
+        </table>
+        <p class="insight" id="li_titles_insight"></p>
+      </div>
+      <div class="card">
+        <h3>Top companies <span style="font-size:11px; color:var(--text-3); font-weight:400;">by impressions</span></h3>
+        <table>
+          <thead><tr><th>Company</th><th style="text-align:right;">Imp</th><th style="text-align:right;">Share</th></tr></thead>
+          <tbody id="li_companies"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <section id="sec-influ2">
+    <div class="sec-head">
+      <h2>UK — verticalised campaigns (Influ2)</h2>
+      <span class="range" id="sea_status"></span>
+    </div>
+    <p class="lead">Travel &amp; Hospitality and BFS cohorts. Top 5 influenced contacts and companies, plus campaign metrics.</p>
+    <div class="two-col">
+      <div class="card" id="th_card"></div>
+      <div class="card" id="bfs_card"></div>
+    </div>
+  </section>
+
+  <section id="sec-sea" style="display:none;">
+    <div class="sec-head">
+      <h2>UK — SEA / Google Ads</h2>
+      <span class="range" id="sea_range"></span>
+    </div>
+    <p class="lead" id="sea_lead"></p>
+    <div class="metric-grid" id="sea_metrics"></div>
+  </section>
+
+  <div class="read"><strong>Read of the week.</strong> <span id="read"></span></div>
+
+  <footer class="page-foot">
+    <div>Foundever EMEA · UK campaign dashboard</div>
+    <div>Source data: <code>data.json</code> · update weekly</div>
+  </footer>
+</div>
+
+</div>
+
+<script>
+(async function () {
+  const $ = (id) => document.getElementById(id);
+  const showError = (msg) => {
+    $("loading").style.display = "none";
+    $("error").style.display = "block";
+    $("error").textContent = msg;
+  };
+
+  let data;
+  try {
+    const res = await fetch("data.json", { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    data = await res.json();
+  } catch (e) {
+    showError("Couldn't load data.json — make sure it sits next to index.html. (" + e.message + ")");
+    return;
+  }
+
+  const fmt = new Intl.NumberFormat("en-GB");
+  const usd = (n) => "$" + fmt.format(Math.round(n * 100) / 100);
+
+  $("title").textContent = data.report_meta.title;
+  $("subtitle").textContent = data.report_meta.subtitle;
+  $("last_updated").textContent = data.report_meta.last_updated;
+  $("owner").textContent = data.report_meta.owner;
+
+  const li = data.linkedin_horizontal;
+  $("li_range").textContent = li.date_range;
+  $("li_lead").innerHTML = li.campaign_name + " · " + li.objective + " · " + li.format + " · main creative: <em>" + li.main_creative + "</em>";
+  const liCards = [
+    ["Spend", usd(li.metrics.spend_usd)],
+    ["Impressions", fmt.format(li.metrics.impressions)],
+    ["Clicks", fmt.format(li.metrics.clicks)],
+    ["CTR", li.metrics.ctr_pct + "%"],
+    ["CPM", usd(li.metrics.cpm_usd)],
+    ["CPC", usd(li.metrics.cpc_usd)]
+  ];
+  $("li_metrics").innerHTML = liCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
+
+  $("li_titles").innerHTML = li.top_titles.map(t => {
+    const clicks = t.clicks == null ? "—" : fmt.format(t.clicks);
+    const ctr = t.ctr_pct == null ? "—" : t.ctr_pct + "%";
+    return '<tr><td>'+t.title+'</td><td class="num"><strong>'+fmt.format(t.impressions)+'</strong></td><td class="num">'+clicks+'</td><td class="num">'+ctr+'</td></tr>';
+  }).join("");
+  const insightTitle = li.top_titles.find(t => t.note);
+  $("li_titles_insight").textContent = insightTitle ? insightTitle.note : "";
+
+  $("li_companies").innerHTML = li.top_companies.map(c =>
+    '<tr><td>'+c.company+'</td><td class="num"><strong>'+fmt.format(c.impressions)+'</strong></td><td class="num">'+c.share_pct+'%</td></tr>'
+  ).join("");
+
+  function renderInflu2(elId, c) {
+    const m = c.metrics;
+    const html = `
+      <h3>${c.vertical} <span class="pill">${c.cohort_name}</span></h3>
+      <p class="sub">Date range pulled: ${c.date_range_pulled} · active ${c.active_period}</p>
+      <div class="small-metric-grid">
+        <div class="small-metric"><div class="label">Reach</div><div class="value">${m.reach_targets}</div></div>
+        <div class="small-metric"><div class="label">BGs</div><div class="value">${m.reach_buying_groups}</div></div>
+        <div class="small-metric"><div class="label">Imp</div><div class="value">${fmt.format(m.impressions)}</div></div>
+        <div class="small-metric"><div class="label">CTR</div><div class="value">${m.ctr_pct}%</div></div>
+        <div class="small-metric span-2"><div class="label">Top creative</div><div class="creative">${m.top_creative.name} · ${fmt.format(m.top_creative.impressions)} imp · ${m.top_creative.ctr_pct}% CTR</div></div>
+      </div>
+      <div class="group-head">Top 5 influenced contacts</div>
+      <table><tbody>
+        ${c.top_contacts.map(p => `<tr class="contact"><td><div class="name">${p.name}</div><div class="role">${p.title} · ${p.company}</div></td><td class="num">${p.last_engagement}</td></tr>`).join("")}
+      </tbody></table>
+      <div class="group-head">Top 5 influenced companies</div>
+      <table><tbody>
+        ${c.top_companies.map(co => `<tr><td>${co.company}</td><td class="num">${co.contacts} contact${co.contacts === 1 ? "" : "s"}</td></tr>`).join("")}
+      </tbody></table>
+    `;
+    $(elId).innerHTML = html;
+  }
+  renderInflu2("th_card", data.influ2_th);
+  renderInflu2("bfs_card", data.influ2_bfs);
+
+  if (data.sea && data.sea.status === "pending") {
+    $("sea_status").innerHTML = '<span class="pending">SEA data pending — to pull from team</span>';
+  } else if (data.sea && data.sea.metrics) {
+    $("sec-sea").style.display = "block";
+    $("sea_range").textContent = data.sea.date_range || "";
+    $("sea_lead").textContent = data.sea.note || "";
+    const seaCards = Object.entries(data.sea.metrics).map(([k,v]) => [k, v]);
+    $("sea_metrics").innerHTML = seaCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
+  }
+
+  $("read").textContent = data.read_of_the_week;
+
+  $("loading").style.display = "none";
+  $("root").style.display = "block";
+})();
+</script>
+</body>
+</html>
