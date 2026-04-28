@@ -163,9 +163,9 @@
     </div>
   </section>
 
-  <section id="sec-li">
+  <section id="sec-li" style="display:none;">
     <div class="sec-head">
-      <h2>UK — LinkedIn horizontal campaign</h2>
+      <h2>LinkedIn horizontal campaign</h2>
       <span class="range" id="li_range"></span>
     </div>
     <p class="lead" id="li_lead"></p>
@@ -189,21 +189,18 @@
     </div>
   </section>
 
-  <section id="sec-influ2">
+  <section id="sec-influ2" style="display:none;">
     <div class="sec-head">
-      <h2>UK — verticalised campaigns (Influ2)</h2>
+      <h2>Verticalised campaigns (Influ2)</h2>
       <span class="range" id="sea_status"></span>
     </div>
-    <p class="lead">Travel &amp; Hospitality and BFS cohorts. Top 5 influenced contacts and companies, plus campaign metrics.</p>
-    <div class="two-col">
-      <div class="card" id="th_card"></div>
-      <div class="card" id="bfs_card"></div>
-    </div>
+    <p class="lead" id="influ2_lead">Top 5 influenced contacts and companies, plus campaign metrics.</p>
+    <div class="two-col" id="influ2_cards"></div>
   </section>
 
   <section id="sec-sea" style="display:none;">
     <div class="sec-head">
-      <h2>UK — SEA / Google Ads</h2>
+      <h2>SEA / Google Ads</h2>
       <span class="range" id="sea_range"></span>
     </div>
     <p class="lead" id="sea_lead"></p>
@@ -213,7 +210,7 @@
   <div class="read"><strong>Read of the week.</strong> <span id="read"></span></div>
 
   <footer class="page-foot">
-    <div>Foundever EMEA · UK campaign dashboard</div>
+    <div id="foot_label">Foundever EMEA · campaign dashboard</div>
     <div>Source data: <code>data.json</code> · update weekly</div>
   </footer>
 </div>
@@ -246,6 +243,9 @@
   $("subtitle").textContent = data.report_meta.subtitle;
   $("last_updated").textContent = data.report_meta.last_updated;
   $("owner").textContent = data.report_meta.owner;
+  if (data.report_meta.region) {
+    $("foot_label").textContent = "Foundever EMEA · " + data.report_meta.region + " campaign dashboard";
+  }
 
   if (data.exec_overview) {
     const ex = data.exec_overview;
@@ -317,30 +317,33 @@
     $("sec-exec").style.display = "block";
   }
 
-  const li = data.linkedin_horizontal;
-  $("li_range").textContent = li.date_range;
-  $("li_lead").innerHTML = li.campaign_name + " · " + li.objective + " · " + li.format + " · main creative: <em>" + li.main_creative + "</em>";
-  const liCards = [
-    ["Spend", usd(li.metrics.spend_usd)],
-    ["Impressions", fmt.format(li.metrics.impressions)],
-    ["Clicks", fmt.format(li.metrics.clicks)],
-    ["CTR", li.metrics.ctr_pct + "%"],
-    ["CPM", usd(li.metrics.cpm_usd)],
-    ["CPC", usd(li.metrics.cpc_usd)]
-  ];
-  $("li_metrics").innerHTML = liCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
+  if (data.linkedin_horizontal) {
+    const li = data.linkedin_horizontal;
+    $("sec-li").style.display = "block";
+    $("li_range").textContent = li.date_range;
+    $("li_lead").innerHTML = li.campaign_name + " · " + li.objective + " · " + li.format + " · main creative: <em>" + li.main_creative + "</em>";
+    const liCards = [
+      ["Spend", usd(li.metrics.spend_usd)],
+      ["Impressions", fmt.format(li.metrics.impressions)],
+      ["Clicks", fmt.format(li.metrics.clicks)],
+      ["CTR", li.metrics.ctr_pct + "%"],
+      ["CPM", usd(li.metrics.cpm_usd)],
+      ["CPC", usd(li.metrics.cpc_usd)]
+    ];
+    $("li_metrics").innerHTML = liCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
 
-  $("li_titles").innerHTML = li.top_titles.map(t => {
-    const clicks = t.clicks == null ? "—" : fmt.format(t.clicks);
-    const ctr = t.ctr_pct == null ? "—" : t.ctr_pct + "%";
-    return '<tr><td>'+t.title+'</td><td class="num"><strong>'+fmt.format(t.impressions)+'</strong></td><td class="num">'+clicks+'</td><td class="num">'+ctr+'</td></tr>';
-  }).join("");
-  const insightTitle = li.top_titles.find(t => t.note);
-  $("li_titles_insight").textContent = insightTitle ? insightTitle.note : "";
+    $("li_titles").innerHTML = li.top_titles.map(t => {
+      const clicks = t.clicks == null ? "—" : fmt.format(t.clicks);
+      const ctr = t.ctr_pct == null ? "—" : t.ctr_pct + "%";
+      return '<tr><td>'+t.title+'</td><td class="num"><strong>'+fmt.format(t.impressions)+'</strong></td><td class="num">'+clicks+'</td><td class="num">'+ctr+'</td></tr>';
+    }).join("");
+    const insightTitle = li.top_titles.find(t => t.note);
+    $("li_titles_insight").textContent = insightTitle ? insightTitle.note : "";
 
-  $("li_companies").innerHTML = li.top_companies.map(c =>
-    '<tr><td>'+c.company+'</td><td class="num"><strong>'+fmt.format(c.impressions)+'</strong></td><td class="num">'+c.share_pct+'%</td></tr>'
-  ).join("");
+    $("li_companies").innerHTML = li.top_companies.map(c =>
+      '<tr><td>'+c.company+'</td><td class="num"><strong>'+fmt.format(c.impressions)+'</strong></td><td class="num">'+c.share_pct+'%</td></tr>'
+    ).join("");
+  }
 
   function renderInflu2(elId, c) {
     const m = c.metrics;
@@ -365,8 +368,16 @@
     `;
     $(elId).innerHTML = html;
   }
-  renderInflu2("th_card", data.influ2_th);
-  renderInflu2("bfs_card", data.influ2_bfs);
+  const cohortKeys = Object.keys(data).filter(k => k.startsWith("influ2_"));
+  if (cohortKeys.length) {
+    $("sec-influ2").style.display = "block";
+    $("influ2_cards").innerHTML = cohortKeys.map(k => '<div class="card" id="' + k + '_card"></div>').join("");
+    cohortKeys.forEach(k => renderInflu2(k + "_card", data[k]));
+    const verticals = cohortKeys.map(k => data[k].vertical).filter(Boolean);
+    if (verticals.length) {
+      $("influ2_lead").textContent = verticals.join(" and ") + " cohort" + (verticals.length === 1 ? "" : "s") + ". Top 5 influenced contacts and companies, plus campaign metrics.";
+    }
+  }
 
   if (data.sea && data.sea.status === "pending") {
     $("sea_status").innerHTML = '<span class="pending">SEA data pending — to pull from team</span>';
