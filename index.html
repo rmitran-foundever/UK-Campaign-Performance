@@ -90,6 +90,21 @@
   .read { background: var(--surface-2); border-radius: 8px; padding: 14px 18px; font-size: 13px; color: var(--text-2); margin-top: 1rem; }
   .read strong { color: var(--text); font-weight: 500; }
 
+  .exec-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; }
+  @media (max-width: 720px) { .exec-grid { grid-template-columns: 1fr; } }
+  .exec-card { background: var(--surface); border: 0.5px solid var(--border); border-radius: 12px; padding: 1rem 1.25rem; }
+  .exec-card h3 { margin: 0 0 0.5rem; font-size: 13px; font-weight: 500; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; }
+  .exec-card ul { margin: 0; padding: 0; list-style: none; }
+  .exec-card ul li { padding: 6px 0; border-bottom: 0.5px solid var(--border); font-size: 13px; }
+  .exec-card ul li:last-child { border-bottom: 0; }
+  .exec-card.full { grid-column: 1 / -1; }
+  .next-list { margin: 0; padding: 0; list-style: none; }
+  .next-list li { padding: 10px 0; border-bottom: 0.5px solid var(--border); }
+  .next-list li:last-child { border-bottom: 0; }
+  .next-list .next-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .next-list .next-blocker { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+  .next-list .next-blocker::before { content: "Blocker — "; color: var(--warn); font-weight: 500; }
+
   .pending { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--warn); background: rgba(133, 79, 11, 0.08); padding: 4px 10px; border-radius: 6px; }
   .pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
 
@@ -117,6 +132,26 @@
       <div><strong>Owner</strong> · <span id="owner"></span></div>
     </div>
   </header>
+
+  <section id="sec-exec" style="display:none;">
+    <div class="sec-head">
+      <h2>Exec overview</h2>
+    </div>
+    <div class="exec-grid">
+      <div class="exec-card">
+        <h3>Current campaigns running</h3>
+        <ul id="exec_current"></ul>
+      </div>
+      <div class="exec-card">
+        <h3>Channel engagement</h3>
+        <p id="exec_engagement" style="margin:0; font-size:13px; color:var(--text-2);"></p>
+      </div>
+      <div class="exec-card full">
+        <h3>Next campaigns to launch &amp; blockers</h3>
+        <ol class="next-list" id="exec_next"></ol>
+      </div>
+    </div>
+  </section>
 
   <section id="sec-li">
     <div class="sec-head">
@@ -201,6 +236,16 @@
   $("subtitle").textContent = data.report_meta.subtitle;
   $("last_updated").textContent = data.report_meta.last_updated;
   $("owner").textContent = data.report_meta.owner;
+
+  if (data.exec_overview) {
+    const ex = data.exec_overview;
+    $("exec_current").innerHTML = ex.current_campaigns.map(c => '<li>' + c + '</li>').join("");
+    $("exec_engagement").textContent = ex.channel_engagement;
+    $("exec_next").innerHTML = ex.next_campaigns.map(n =>
+      '<li><div class="next-name">' + n.name + '</div><div class="next-blocker">' + n.blocker + '</div></li>'
+    ).join("");
+    $("sec-exec").style.display = "block";
+  }
 
   const li = data.linkedin_horizontal;
   $("li_range").textContent = li.date_range;

@@ -7,6 +7,29 @@
     "notes": "Update this file each week. Layout is in index.html — only numbers and dates change here."
   },
 
+  "exec_overview": {
+    "current_campaigns": [
+      "UK Horizontal — LinkedIn (rightshoring)",
+      "UK Travel & Hospitality — Influ2 cohort",
+      "UK Banking & Financial Services — Influ2 cohort"
+    ],
+    "channel_engagement": "LinkedIn live and reaching target ICP (CSMs, CEOs at NHS, DWP, Lloyds, Aviva). Influ2 live across T&H (easyJet lit up) and BFS (Nationwide, OSB, Goldman engaging). SEA still to pull from team — pending.",
+    "next_campaigns": [
+      {
+        "name": "UK Insurance — end-to-end deployment",
+        "blocker": "Waiting on Content marketing to wrap up the eBook."
+      },
+      {
+        "name": "UK Horizontal — additional layer on Influ2",
+        "blocker": "Waiting on James (Regional Leader) to send top leads to engage with from inside sales; include an additional piece of content across channels; confirm translation for the mid-funnel page (Regional Leader); send the ads overview (Campaign Strategist — Raluca)."
+      },
+      {
+        "name": "ECCCSA article",
+        "blocker": "Brainstorming stage — what can we do?"
+      }
+    ]
+  },
+
   "linkedin_horizontal": {
     "campaign_name": "2026-Q2-UK-Horizontal-Campaign",
     "ad_set": "Website visits — Apr 23, 2026",
