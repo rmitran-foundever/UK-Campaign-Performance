@@ -105,6 +105,16 @@
   .next-list .next-blocker { font-size: 12px; color: var(--text-2); margin-top: 4px; }
   .next-list .next-blocker::before { content: "Blocker — "; color: var(--warn); font-weight: 500; }
 
+  .channel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 720px) { .channel-grid { grid-template-columns: 1fr; } }
+  .channel-block { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; }
+  .channel-block .ch-label { font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; font-weight: 500; }
+  .ch-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 12px; }
+  .ch-metric .m-label { font-size: 10px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.04em; }
+  .ch-metric .m-value { font-size: 15px; font-weight: 500; color: var(--text); margin-top: 2px; }
+  .channel-block.pending-block { display: flex; flex-direction: column; justify-content: flex-start; }
+  .channel-block.pending-block .pending { align-self: flex-start; margin-top: 4px; }
+
   .pending { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--warn); background: rgba(133, 79, 11, 0.08); padding: 4px 10px; border-radius: 6px; }
   .pending::before { content: ""; width: 6px; height: 6px; border-radius: 50%; background: var(--warn); }
 
@@ -138,13 +148,13 @@
       <h2>Exec overview</h2>
     </div>
     <div class="exec-grid">
-      <div class="exec-card">
+      <div class="exec-card full">
         <h3>Current campaigns running</h3>
         <ul id="exec_current"></ul>
       </div>
-      <div class="exec-card">
+      <div class="exec-card full">
         <h3>Channel engagement</h3>
-        <p id="exec_engagement" style="margin:0; font-size:13px; color:var(--text-2);"></p>
+        <div class="channel-grid" id="exec_engagement"></div>
       </div>
       <div class="exec-card full">
         <h3>Next campaigns to launch &amp; blockers</h3>
@@ -240,10 +250,70 @@
   if (data.exec_overview) {
     const ex = data.exec_overview;
     $("exec_current").innerHTML = ex.current_campaigns.map(c => '<li>' + c + '</li>').join("");
-    $("exec_engagement").textContent = ex.channel_engagement;
     $("exec_next").innerHTML = ex.next_campaigns.map(n =>
       '<li><div class="next-name">' + n.name + '</div><div class="next-blocker">' + n.blocker + '</div></li>'
     ).join("");
+
+    const fmtInt = (n) => fmt.format(Math.round(n));
+    const channels = [];
+
+    if (data.linkedin_horizontal) {
+      const m = data.linkedin_horizontal.metrics;
+      channels.push({
+        label: "LinkedIn — overall",
+        metrics: [
+          ["Impressions", fmtInt(m.impressions)],
+          ["Clicks", fmtInt(m.clicks)],
+          ["CTR", m.ctr_pct + "%"],
+          ["Spend", usd(m.spend_usd)]
+        ]
+      });
+    }
+
+    const cohorts = Object.keys(data).filter(k => k.startsWith("influ2_")).map(k => data[k]);
+    if (cohorts.length) {
+      let imp = 0, clicks = 0, tR = 0, tT = 0, bgR = 0, bgT = 0;
+      cohorts.forEach(c => {
+        const cm = c.metrics || {};
+        imp += cm.impressions || 0;
+        if (cm.ctr_pct) clicks += (cm.impressions || 0) * cm.ctr_pct / 100;
+        const [a, b] = (cm.reach_targets || "0/0").split("/").map(Number);
+        const [d, e] = (cm.reach_buying_groups || "0/0").split("/").map(Number);
+        tR += a || 0; tT += b || 0; bgR += d || 0; bgT += e || 0;
+      });
+      const blendedCtr = imp ? (clicks / imp * 100).toFixed(2) : "0";
+      channels.push({
+        label: "Influ2 — overall",
+        metrics: [
+          ["Impressions", fmtInt(imp)],
+          ["Blended CTR", "~" + blendedCtr + "%"],
+          ["Targets reached", tR + "/" + tT],
+          ["Buying groups", bgR + "/" + bgT]
+        ]
+      });
+    }
+
+    channels.push({
+      label: "SEA",
+      pending: !data.sea || data.sea.status === "pending"
+    });
+
+    $("exec_engagement").innerHTML = channels.map(ch => {
+      if (ch.pending) {
+        return '<div class="channel-block pending-block">' +
+          '<div class="ch-label">' + ch.label + '</div>' +
+          '<span class="pending">Pending — to pull from team</span>' +
+        '</div>';
+      }
+      const cells = ch.metrics.map(([l,v]) =>
+        '<div class="ch-metric"><div class="m-label">' + l + '</div><div class="m-value">' + v + '</div></div>'
+      ).join("");
+      return '<div class="channel-block">' +
+        '<div class="ch-label">' + ch.label + '</div>' +
+        '<div class="ch-metrics">' + cells + '</div>' +
+      '</div>';
+    }).join("");
+
     $("sec-exec").style.display = "block";
   }
 
