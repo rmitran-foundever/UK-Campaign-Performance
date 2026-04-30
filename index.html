@@ -105,7 +105,7 @@
   .next-list .next-blocker { font-size: 12px; color: var(--text-2); margin-top: 4px; }
   .next-list .next-blocker::before { content: "Blocker — "; color: var(--warn); font-weight: 500; }
 
-  .channel-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .channel-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
   @media (max-width: 720px) { .channel-grid { grid-template-columns: 1fr; } }
   .channel-block { background: var(--surface-2); border-radius: 8px; padding: 12px 14px; }
   .channel-block .ch-label { font-size: 11px; color: var(--text-2); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 10px; font-weight: 500; }
@@ -205,6 +205,17 @@
     </div>
     <p class="lead" id="sea_lead"></p>
     <div class="metric-grid" id="sea_metrics"></div>
+    <div id="sea_campaigns"></div>
+  </section>
+
+  <section id="sec-hubspot" style="display:none;">
+    <div class="sec-head">
+      <h2>HubSpot — landing pages</h2>
+      <span class="range" id="hubspot_range"></span>
+    </div>
+    <p class="lead" id="hubspot_lead"></p>
+    <div class="metric-grid" id="hubspot_totals"></div>
+    <div id="hubspot_pages"></div>
   </section>
 
   <div class="read"><strong>Read of the week.</strong> <span id="read"></span></div>
@@ -270,13 +281,17 @@
       });
     }
 
-    const cohorts = Object.keys(data).filter(k => k.startsWith("influ2_")).map(k => data[k]);
+    const cohorts = Object.keys(data).filter(k => k.startsWith("influ2_") && k !== "influ2_summary").map(k => data[k]);
     if (cohorts.length) {
       let imp = 0, clicks = 0, tR = 0, tT = 0, bgR = 0, bgT = 0;
       cohorts.forEach(c => {
         const cm = c.metrics || {};
         imp += cm.impressions || 0;
-        if (cm.ctr_pct) clicks += (cm.impressions || 0) * cm.ctr_pct / 100;
+        if (typeof cm.clicks === "number") {
+          clicks += cm.clicks;
+        } else if (cm.ctr_pct) {
+          clicks += (cm.impressions || 0) * cm.ctr_pct / 100;
+        }
         const [a, b] = (cm.reach_targets || "0/0").split("/").map(Number);
         const [d, e] = (cm.reach_buying_groups || "0/0").split("/").map(Number);
         tR += a || 0; tT += b || 0; bgR += d || 0; bgT += e || 0;
@@ -293,10 +308,36 @@
       });
     }
 
-    channels.push({
-      label: "SEA",
-      pending: !data.sea || data.sea.status === "pending"
-    });
+    if (data.sea && data.sea.status === "live" && data.sea.totals) {
+      const t = data.sea.totals;
+      channels.push({
+        label: "SEA — overall",
+        metrics: [
+          ["Impressions", fmtInt(t.impressions || 0)],
+          ["Clicks", fmtInt(t.clicks || 0)],
+          ["Conversions", fmtInt(t.conversions || 0)],
+          ["Spend", usd(t.spend_usd || 0)]
+        ]
+      });
+    } else {
+      channels.push({
+        label: "SEA",
+        pending: true
+      });
+    }
+
+    if (data.hubspot && data.hubspot.status === "live" && data.hubspot.totals) {
+      const t = data.hubspot.totals;
+      channels.push({
+        label: "HubSpot — landing pages",
+        metrics: [
+          ["Page views", fmtInt(t.page_views_apr_2026 || 0)],
+          ["Form subs", fmtInt(t.form_submissions_apr_2026 || 0)],
+          ["New contacts", fmtInt(t.new_contacts_apr_2026 || 0)],
+          ["New customers", fmtInt(t.new_customers_apr_2026 || 0)]
+        ]
+      });
+    }
 
     $("exec_engagement").innerHTML = channels.map(ch => {
       if (ch.pending) {
@@ -346,29 +387,69 @@
   }
 
   function renderInflu2(elId, c) {
-    const m = c.metrics;
-    const html = `
-      <h3>${c.vertical} <span class="pill">${c.cohort_name}</span></h3>
-      <p class="sub">Date range pulled: ${c.date_range_pulled} · active ${c.active_period}</p>
-      <div class="small-metric-grid">
-        <div class="small-metric"><div class="label">Reach</div><div class="value">${m.reach_targets}</div></div>
-        <div class="small-metric"><div class="label">BGs</div><div class="value">${m.reach_buying_groups}</div></div>
-        <div class="small-metric"><div class="label">Imp</div><div class="value">${fmt.format(m.impressions)}</div></div>
-        <div class="small-metric"><div class="label">CTR</div><div class="value">${m.ctr_pct}%</div></div>
-        <div class="small-metric span-2"><div class="label">Top creative</div><div class="creative">${m.top_creative.name} · ${fmt.format(m.top_creative.impressions)} imp · ${m.top_creative.ctr_pct}% CTR</div></div>
-      </div>
-      <div class="group-head">Top 5 influenced contacts</div>
+    const m = c.metrics || {};
+    const tc = m.top_creative || {};
+    const creativeLine = tc.name
+      ? `${tc.name} · ${fmt.format(tc.impressions || 0)} imp · ${(tc.ctr_pct != null ? tc.ctr_pct : 0)}% CTR`
+      : "—";
+
+    // Engaged: people who clicked. Falls back to UK-style top_contacts.
+    const engagedSrc = (c.engaged && c.engaged.length) ? c.engaged
+                     : (c.top_contacts && c.top_contacts.length) ? c.top_contacts
+                     : [];
+    const engagedRows = engagedSrc.length ? `
+      <div class="group-head">${(c.engaged !== undefined) ? "Engaged contacts (clicked)" : "Top engaged contacts"}</div>
       <table><tbody>
-        ${c.top_contacts.map(p => `<tr class="contact"><td><div class="name">${p.name}</div><div class="role">${p.title} · ${p.company}</div></td><td class="num">${p.last_engagement}</td></tr>`).join("")}
+        ${engagedSrc.slice(0,5).map(p => {
+          const detail = p.last_engagement || (p.clicks ? `${p.clicks} click${p.clicks === 1 ? "" : "s"}` : "");
+          return `<tr class="contact"><td><div class="name">${p.name}</div><div class="role">${p.title} · ${p.company}</div></td><td class="num">${detail}</td></tr>`;
+        }).join("")}
       </tbody></table>
+    ` : (c.engaged !== undefined ? `<div class="group-head">Engaged contacts (clicked)</div><p class="insight">No clicks yet for this cohort.</p>` : "");
+
+    // Influenced: saw impressions but no click. Only present in new schema.
+    const influencedRows = (c.top_influenced && c.top_influenced.length) ? `
+      <div class="group-head">Top influenced contacts (impressions only)</div>
+      <table><tbody>
+        ${c.top_influenced.slice(0,5).map(p => `<tr class="contact"><td><div class="name">${p.name}</div><div class="role">${p.title} · ${p.company}</div></td><td class="num">${fmt.format(p.impressions || 0)} imp</td></tr>`).join("")}
+      </tbody></table>
+    ` : "";
+
+    const companyRows = (c.top_companies || []).slice(0,5).map(co => {
+      const detail = (co.impressions !== undefined)
+        ? `${fmt.format(co.impressions)} imp · ${co.contacts} contact${co.contacts === 1 ? "" : "s"}`
+        : `${co.contacts} contact${co.contacts === 1 ? "" : "s"}`;
+      return `<tr><td>${co.company}</td><td class="num">${detail}</td></tr>`;
+    }).join("");
+
+    const audienceLine = (m.audience_total !== undefined)
+      ? `<p class="insight" style="margin-bottom:8px;">Audience ${m.audience_total} · engaged ${m.engaged_count || 0} · influenced ${m.influenced_count || 0} · no impression ${m.no_impression_count || 0}</p>`
+      : "";
+
+    const ctr = m.ctr_pct != null ? m.ctr_pct : 0;
+
+    const html = `
+      <h3>${c.vertical || ""} <span class="pill">${c.cohort_name || ""}</span></h3>
+      <p class="sub">Date range pulled: ${c.date_range_pulled || ""} · active ${c.active_period || ""}</p>
+      ${audienceLine}
+      <div class="small-metric-grid">
+        <div class="small-metric"><div class="label">Reach</div><div class="value">${m.reach_targets || "—"}</div></div>
+        <div class="small-metric"><div class="label">BGs</div><div class="value">${m.reach_buying_groups || "—"}</div></div>
+        <div class="small-metric"><div class="label">Imp</div><div class="value">${fmt.format(m.impressions || 0)}</div></div>
+        <div class="small-metric"><div class="label">CTR</div><div class="value">${ctr}%</div></div>
+        <div class="small-metric span-2"><div class="label">Top creative</div><div class="creative">${creativeLine}</div></div>
+      </div>
+      ${engagedRows}
+      ${influencedRows}
       <div class="group-head">Top 5 influenced companies</div>
       <table><tbody>
-        ${c.top_companies.map(co => `<tr><td>${co.company}</td><td class="num">${co.contacts} contact${co.contacts === 1 ? "" : "s"}</td></tr>`).join("")}
+        ${companyRows}
       </tbody></table>
+      ${c.data_quality_note ? '<p class="insight" style="color:var(--warn); margin-top:10px;">' + c.data_quality_note + '</p>' : ""}
     `;
     $(elId).innerHTML = html;
   }
-  const cohortKeys = Object.keys(data).filter(k => k.startsWith("influ2_"));
+  const cohortKeys = Object.keys(data).filter(k => k.startsWith("influ2_") && k !== "influ2_summary");
   if (cohortKeys.length) {
     $("sec-influ2").style.display = "block";
     $("influ2_cards").innerHTML = cohortKeys.map(k => '<div class="card" id="' + k + '_card"></div>').join("");
@@ -381,12 +462,69 @@
 
   if (data.sea && data.sea.status === "pending") {
     $("sea_status").innerHTML = '<span class="pending">SEA data pending — to pull from team</span>';
+  } else if (data.sea && data.sea.totals) {
+    // New schema: totals + campaigns array
+    $("sec-sea").style.display = "block";
+    $("sea_range").textContent = data.sea.date_range || "";
+    $("sea_lead").textContent = data.sea.note || "";
+    const t = data.sea.totals;
+    const totalsCards = [
+      ["Spend", usd(t.spend_usd || 0)],
+      ["Impressions", fmt.format(t.impressions || 0)],
+      ["Clicks", fmt.format(t.clicks || 0)],
+      ["CTR", (t.ctr_pct != null ? t.ctr_pct : 0) + "%"],
+      ["Conversions", fmt.format(t.conversions || 0)],
+      ["Cost / conv", usd(t.cost_per_conversion_usd || 0)]
+    ];
+    $("sea_metrics").innerHTML = totalsCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
+    if (data.sea.campaigns && data.sea.campaigns.length) {
+      $("sea_campaigns").innerHTML = `
+        <div class="group-head" style="margin-top:18px;">Campaigns</div>
+        <table>
+          <thead><tr><th>Name</th><th>Status</th><th class="num">Imp</th><th class="num">Clicks</th><th class="num">Conv</th><th class="num">Spend</th></tr></thead>
+          <tbody>
+            ${data.sea.campaigns.map(c => `<tr><td><div class="name">${c.name}</div>${c.flag ? '<div class="role" style="color:var(--warn);">'+c.flag+'</div>' : ''}</td><td>${c.status || '—'}</td><td class="num">${fmt.format(c.impressions || 0)}</td><td class="num">${fmt.format(c.clicks || 0)}</td><td class="num">${fmt.format(c.conversions || 0)}</td><td class="num">${usd(c.spend_usd || 0)}</td></tr>`).join("")}
+          </tbody>
+        </table>
+      `;
+    }
   } else if (data.sea && data.sea.metrics) {
+    // Old schema: metrics object with label/value pairs
     $("sec-sea").style.display = "block";
     $("sea_range").textContent = data.sea.date_range || "";
     $("sea_lead").textContent = data.sea.note || "";
     const seaCards = Object.entries(data.sea.metrics).map(([k,v]) => [k, v]);
     $("sea_metrics").innerHTML = seaCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
+  }
+
+  if (data.hubspot && data.hubspot.status === "live") {
+    $("sec-hubspot").style.display = "block";
+    $("hubspot_range").textContent = data.hubspot.date_range || "";
+    $("hubspot_lead").textContent = data.hubspot.note || "";
+    if (data.hubspot.totals) {
+      const t = data.hubspot.totals;
+      const totalsCards = [
+        ["Page views", fmt.format(t.page_views_apr_2026 || 0)],
+        ["Form submissions", fmt.format(t.form_submissions_apr_2026 || 0)],
+        ["New contacts", fmt.format(t.new_contacts_apr_2026 || 0)],
+        ["New customers", fmt.format(t.new_customers_apr_2026 || 0)]
+      ];
+      $("hubspot_totals").innerHTML = totalsCards.map(([l,v]) => '<div class="metric"><div class="label">'+l+'</div><div class="value">'+v+'</div></div>').join("");
+    }
+    if (data.hubspot.pages && data.hubspot.pages.length) {
+      $("hubspot_pages").innerHTML = '<div class="two-col" style="margin-top:14px;">' + data.hubspot.pages.map(p => `
+        <div class="card">
+          <h3>${p.name} ${p.region ? '<span class="pill">' + p.region + '</span>' : ''}</h3>
+          <p class="sub">${p.page_name || ''}${p.publish_date ? ' · published ' + p.publish_date : ''}</p>
+          <div class="small-metric-grid">
+            <div class="small-metric"><div class="label">Page views</div><div class="value">${fmt.format(p.page_views || 0)}</div></div>
+            <div class="small-metric"><div class="label">Form subs</div><div class="value">${fmt.format(p.form_submissions || 0)}</div></div>
+            <div class="small-metric"><div class="label">Bounce</div><div class="value">${p.bounce_rate_pct || 0}%</div></div>
+          </div>
+          ${p.flag ? '<p class="insight" style="color:var(--warn);">' + p.flag + '</p>' : ''}
+        </div>
+      `).join("") + '</div>';
+    }
   }
 
   $("read").textContent = data.read_of_the_week;
